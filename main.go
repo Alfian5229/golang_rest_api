@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -60,4 +62,31 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(posts)
+}
+
+func createPost(w http.ResponseWriter, r *http.Request) {
+
+	stmt, err := db.Prepare("INSERT INTO posts(title) VALUES(?)")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	keyVal := make(map[string]string)
+	json.Unmarshal(body, &keyVal)
+
+	title := keyVal["title"]
+	_, err = stmt.Exec(title)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	fmt.Fprintf(w, "New post was created")
 }

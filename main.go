@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -34,4 +35,29 @@ func main() {
 	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
 
 	http.ListenAndServe(":8000", router)
+}
+
+func getPosts(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var posts []Post
+	result, err := db.Query("SELECT id, title from posts")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer result.Close()
+
+	for result.Next() {
+		var post Post
+		err := result.Scan(&post.ID, &post.Title)
+		if err != nil {
+			panic(err.Error())
+		}
+		posts = append(posts, post)
+	}
+
+	json.NewEncoder(w).Encode(posts)
 }

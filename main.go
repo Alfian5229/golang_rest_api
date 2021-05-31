@@ -8,6 +8,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Post struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
 var db *sql.DB
 var err error
 
@@ -27,5 +32,6 @@ func main() {
 	router.HandleFunc("/posts/{id}", getPost).Methods("GET")
 	router.HandleFunc("/posts/{id}", updatePost).Methods("PUT")
 	router.HandleFunc("/posts/{id}", deletePost).Methods("DELETE")
+
 	http.ListenAndServe(":8000", router)
 }
